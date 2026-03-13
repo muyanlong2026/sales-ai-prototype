@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1440, initial-scale=1.0">
+    <title>销售保AI - 免费试用功能演示原型</title>
+    <style>
+        /* ====== Reset & Base ====== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif; color: #333; background: #f5f6fa; overflow-x: hidden; }
+        a { text-decoration: none; color: inherit; }
+        button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+        input { outline: none; font-family: inherit; }
+        
+        /* ====== Page Container ====== */
+        .page { display: none; width: 100%; min-height: 100vh; }
+        .page.active { display: flex; }
+        
+        /* ====== LOGIN PAGE ====== */
+        #loginPage { flex-direction: row; }
+        .login-left {
+            width: 52%; min-height: 100vh;
+            background: linear-gradient(135deg, #e8f0fe 0%, #d4e4ff 50%, #c8d8f8 100%);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 60px; position: relative; overflow: hidden;
+        }
+        .login-left h1 {
+            font-size: 32px; color: #1a56db; font-weight: 700; margin-bottom: 40px;
+            z-index: 1; text-align: center; line-height: 1.4;
+        }
+        .login-left h1 span { color: #333; }
+        .login-illustration {
+            width: 520px; height: 380px; 
+            background: linear-gradient(135deg, rgba(75,123,245,0.1) 0%, rgba(75,123,245,0.05) 100%);
+            border-radius: 20px; display: flex; align-items: center; justify-content: center;
+            position: relative; z-index: 1;
+        }
+        .illustration-content {
+            text-align: center; color: #4B7BF5;
+        }
+        .illustration-content .ai-icon {
+            font-size: 120px; font-weight: 900; opacity: 0.15;
+            background: linear-gradient(135deg, #4B7BF5, #7C3AED);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .illustration-content p { font-size: 16px; color: #6B7FBF; margin-top: 10px; }
+        .login-stats {
+            display: flex; gap: 40px; margin-top: 60px; z-index: 1;
+        }
+        .stat-item { text-align: center; }
+        .stat-item .label { font-size: 13px; color: #666; margin-bottom: 8px; }
+        .stat-item .value { font-size: 28px; font-weight: 800; color: #1a56db; font-style: italic; }
+        .stat-item .value span { font-size: 14px; font-weight: 400; color: #666; vertical-align: middle; }
+        
+        .login-right {
+            width: 48%; min-height: 100vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: #fff; padding: 60px;
+        }
+        .login-logo {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 50px;
+        }
+        .login-logo .logo-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: linear-gradient(135deg, #4B7BF5, #7C3AED);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 20px; font-weight: 700;
+        }
+        .login-logo .logo-text h2 { font-size: 22px; color: #333; font-weight: 700; }
+        .login-logo .logo-text p { font-size: 11px; color: #999; letter-spacing: 2px; }
+        
+        .login-tabs { display: flex; gap: 30px; margin-bottom: 30px; }
+        .login-tab { 
+            font-size: 16px; color: #999; cursor: pointer; padding-bottom: 8px;
+            border-bottom: 2px solid transparent; transition: all 0.3s;
+        }
+        .login-tab.active { color: #4B7BF5; border-bottom-color: #4B7BF5; }
+        
+        .login-form { width: 360px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group input {
+            width: 100%; height: 48px; border: 1px solid #e0e0e0; border-radius: 8px;
+            padding: 0 16px; font-size: 14px; color: #333; transition: border-color 0.3s;
+        }
+        .form-group input:focus { border-color: #4B7BF5; }
+        .form-group input::placeholder { color: #bbb; }
+        
+        .form-options { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .form-options label { font-size: 13px; color: #666; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .form-options label input[type="checkbox"] { width: 14px; height: 14px; }
+        .form-options a { font-size: 13px; color: #4B7BF5; }
+        
+        .btn-login {
+            width: 100%; height: 48px; border-radius: 8px;
+            background: linear-gradient(135deg, #4B7BF5, #5B8AF7);
+            color: #fff; font-size: 16px; font-weight: 600;
+            transition: all 0.3s; box-shadow: 0 4px 15px rgba(75,123,245,0.3);
+        }
+        .btn-login:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(75,123,245,0.4); }
+        
+        .login-links { margin-top: 20px; text-align: center; font-size: 13px; color: #999; }
+        .login-links a { color: #4B7BF5; margin: 0 6px; }
+        .login-links a:hover { text-decoration: underline; }
+        
+        /* Free Trial Entry */
+        .trial-entry {
+            margin-top: 32px; width: 360px;
+            background: linear-gradient(135deg, #f0f5ff 0%, #ede7f6 100%);
+            border: 1px solid #e0e7ff; border-radius: 12px;
+            padding: 20px 24px; cursor: pointer; transition: all 0.3s;
+            display: flex; align-items: center; gap: 16px;
+        }
+        .trial-entry:hover {
+            transform: translateY(-2px); box-shadow: 0 8px 25px rgba(75,123,245,0.15);
+            border-color: #c7d2fe;
+        }
+        .trial-icon {
+            width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+            background: linear-gradient(135deg, #4B7BF5, #7C3AED);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .trial-icon svg { width: 24px; height: 24px; fill: #fff; }
+        .trial-info h3 { font-size: 15px; color: #333; font-weight: 600; margin-bottom: 4px; }
+        .trial-info p { font-size: 12px; color: #888; line-height: 1.5; }
+        .trial-arrow { margin-left: auto; color: #4B7BF5; font-size: 20px; }
+        
+        /* ====== UPLOAD PAGE ====== */
+        #uploadPage { flex-direction: column; align-items: center; background: #f5f7fb; }
+        .upload-header {
+            width: 100%; padding: 20px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .upload-header .logo-sm { display: flex; align-items: center; gap: 8px; }
+        .upload-header .logo-sm .icon {
+            width: 36px; height: 36px; border-radius: 8px;
+            background: linear-gradient(135deg, #4B7BF5, #7C3AED);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-weight: 700; font-size: 14px;
+        }
+        .upload-header .logo-sm span { font-size: 18px; font-weight: 700; color: #333; }
+        .upload-header .back-btn {
+            font-size: 14px; color: #666; cursor: pointer; display: flex; align-items: center; gap: 4px;
+        }
+        .upload-header .back-btn:hover { color: #4B7BF5; }
+        
+        .upload-container { width: 800px; margin: 40px auto; padding-bottom: 60px; }
+        
+        /* Steps */
+        .steps { display: flex; align-items: center; justify-content: center; margin-bottom: 50px; }
+        .step { display: flex; align-items: center; gap: 10px; }
+        .step-num {
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 600; transition: all 0.3s;
+        }
+        .step.active .step-num { background: #4B7BF5; color: #fff; }
+        .step.done .step-num { background: #22c55e; color: #fff; }
+        .step:not(.active):not(.done) .step-num { background: #e0e0e0; color: #999; }
+        .step-label { font-size: 14px; color: #666; }
+        .step.active .step-label { color: #4B7BF5; font-weight: 600; }
+        .step.done .step-label { color: #22c55e; }
+        .step-line { width: 80px; height: 2px; background: #e0e0e0; margin: 0 16px; }
+        .step-line.done { background: #22c55e; }
+        
+        .upload-title { text-align: center; margin-bottom: 12px; }
+        .upload-title h2 { font-size: 24px; color: #333; font-weight: 600; }
+        .upload-subtitle { text-align: center; color: #888; font-size: 14px; margin-bottom: 36px; }
+        
+        /* Dropzone */
+        .dropzone {
+            border: 2px dashed #c7d2fe; border-radius: 16px; padding: 50px;
+            text-align: center; background: #fafbff; transition: all 0.3s;
+            cursor: pointer; margin-bottom: 24px;
+        }
+        .dropzone:hover, .dropzone.dragover { border-color: #4B7BF5; background: #f0f5ff; }
+        .dropzone-icon { font-size: 48px; margin-bottom: 16px; }
+        .dropzone h3 { font-size: 16px; color: #333; margin-bottom: 8px; }
+        .dropzone h3 span { color: #4B7BF5; }
+        .dropzone p { font-size: 13px; color: #999; }
+        
+        /* File list */
+        .file-list { margin-bottom: 30px; }
+        .file-item {
+            display: flex; align-items: center; gap: 12px;
+            background: #fff; border: 1px solid #eee; border-radius: 10px;
+            padding: 14px 18px; margin-bottom: 10px; transition: all 0.3s;
+        }
+        .file-item:hover { border-color: #c7d2fe; }
+        .file-icon {
+            width: 40px; height: 40px; border-radius: 8px;
+            background: #f0f5ff; display: flex; align-items: center; justify-content: center;
+        }
+        .file-icon svg { width: 20px; height: 20px; fill: #4B7BF5; }
+        .file-info { flex: 1; }
+        .file-info .name { font-size: 14px; color: #333; font-weight: 500; }
+        .file-info .size { font-size: 12px; color: #999; margin-top: 2px; }
+        .file-progress { width: 120px; }
+        .progress-bar { width: 100%; height: 4px; background: #eee; border-radius: 2px; overflow: hidden; }
+        .progress-bar .fill { height: 100%; background: linear-gradient(90deg, #4B7BF5, #7C3AED); border-radius: 2px; transition: width 0.5s ease; }
+        .file-status { font-size: 12px; margin-top: 2px; text-align: right; }
+        .file-status.uploading { color: #4B7BF5; }
+        .file-status.done { color: #22c55e; }
+        .file-delete { 
+            width: 32px; height: 32px; border-radius: 6px; background: none;
+            color: #ccc; font-size: 18px; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .file-delete:hover { background: #fee; color: #ef4444; }
+        
+        .upload-actions { display: flex; justify-content: center; gap: 16px; }
+        .btn-primary {
+            height: 48px; padding: 0 48px; border-radius: 8px;
+            background: linear-gradient(135deg, #4B7BF5, #5B8AF7);
+            color: #fff; font-size: 15px; font-weight: 600;
+            transition: all 0.3s; box-shadow: 0 4px 15px rgba(75,123,245,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(75,123,245,0.4); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-outline {
+            height: 48px; padding: 0 36px; border-radius: 8px;
+            background: #fff; border: 1px solid #e0e0e0; color: #666; font-size: 15px;
+            transition: all 0.3s;
+        }
+        .btn-outline:hover { border-color: #4B7BF5; color: #4B7BF5; }
+        
+        /* ====== REGISTER PAGE ====== */
+        #registerPage { flex-direction: column; align-items: center; background: #f5f7fb; }
+        .register-container { width: 480px; margin: 60px auto; }
+        .register-card {
+            background: #fff; border-radius: 16px; padding: 48px 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        .register-card h2 { font-size: 22px; color: #333; text-align: center; margin-bottom: 8px; }
+        .register-tip {
+            background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;
+            padding: 14px 16px; margin: 20px 0 28px; display: flex; align-items: flex-start; gap: 10px;
+        }
+        .register-tip .tip-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+        .register-tip p { font-size: 13px; color: #92400e; line-height: 1.6; }
+        
+        .sms-group { display: flex; gap: 10px; }
+        .sms-group input { flex: 1; }
+        .btn-sms {
+            width: 120px; height: 48px; border-radius: 8px; flex-shrink: 0;
+            background: #fff; border: 1px solid #4B7BF5; color: #4B7BF5;
+            font-size: 13px; transition: all 0.3s; white-space: nowrap;
+        }
+        .btn-sms:hover { background: #f0f5ff; }
+        .btn-sms:disabled { border-color: #ccc; color: #999; background: #f9f9f9; }
+        
+        .agreement { display: flex; align-items: flex-start; gap: 8px; margin: 20px 0 24px; }
+        .agreement input { margin-top: 3px; }
+        .agreement label { font-size: 12px; color: #999; line-height: 1.5; }
+        .agreement label a { color: #4B7BF5; }
+        
+        .register-card .btn-primary { width: 100%; }
+        
+        .upload-summary {
+            background: #f8fafc; border-radius: 8px; padding: 16px;
+            margin-bottom: 24px; border: 1px solid #eee;
+        }
+        .upload-summary h4 { font-size: 13px; color: #666; margin-bottom: 8px; }
+        .upload-summary .file-count {
+            font-size: 24px; font-weight: 700; color: #4B7BF5;
+        }
+        .upload-summary .file-count span { font-size: 14px; font-weight: 400; color: #999; }
+        
+        /* ====== DASHBOARD PAGE ====== */
+        #dashboardPage { flex-direction: column; background: #f5f6fa; }
+        .dash-topbar {
+            height: 56px; background: #fff; display: flex; align-items: center;
+            padding: 0 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .dash-topbar .logo-sm { display: flex; align-items: center; gap: 8px; }
+        .dash-topbar .logo-sm .icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: linear-gradient(135deg, #4B7BF5, #7C3AED);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-weight: 700; font-size: 12px;
+        }
+        .dash-topbar .logo-sm .text { font-size: 16px; font-weight: 700; color: #333; }
+        .dash-topbar .logo-sm .sub { font-size: 10px; color: #999; letter-spacing: 1px; margin-left: 2px; }
+        .dash-topbar .org-name { margin-left: 20px; font-size: 14px; color: #666; }
+        .dash-topbar .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 20px; }
+        .topbar-btn { 
+            width: 36px; height: 36px; border-radius: 8px; background: none;
+            display: flex; align-items: center; justify-content: center;
+            color: #888; font-size: 18px; transition: all 0.2s;
+        }
+        .topbar-btn:hover { background: #f0f0f0; color: #333; }
+        .user-avatar {
+            display: flex; align-items: center; gap: 8px; cursor: pointer;
+        }
+        .user-avatar .avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, #4B7BF5, #7C3AED);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 600;
+        }
+        .user-avatar .name { font-size: 14px; color: #333; }
+        
+        .dash-body { display: flex; flex: 1; min-height: calc(100vh - 56px); }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 200px; background: #fff; border-right: 1px solid #f0f0f0;
+            padding: 12px 0; flex-shrink: 0; overflow-y: auto;
+        }
+        .sidebar-section { padding: 0 12px; margin-bottom: 4px; }
+        .sidebar-section .section-title {
+            font-size: 12px; color: #bbb; padding: 8px 12px 4px; font-weight: 500;
+        }
+        .menu-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 8px; cursor: pointer;
+            transition: all 0.2s; font-size: 14px; color: #666; margin-bottom: 2px;
+        }
+        .menu-item:hover { background: #f5f7fb; color: #333; }
+        .menu-item.active { background: #f0f5ff; color: #4B7BF5; font-weight: 600; }
+        .menu-item .icon { width: 20px; text-align: center; font-size: 16px; }
+        .menu-item .badge {
+            margin-left: auto; background: #ef4444; color: #fff;
+            font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 600;
+        }
+        .menu-item .tag-new {
+            margin-left: auto; background: #f0f5ff; color: #4B7BF5;
+            font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600;
+        }
+        .menu-item .tag-trial {
+            margin-left: auto; background: linear-gradient(135deg, #4B7BF5, #7C3AED);
+            color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600;
+        }
+        
+        .sidebar-divider { height: 1px; background: #f0f0f0; margin: 8px 12px; }
+        
+        /* Main Content */
+        .main-content { flex: 1; padding: 24px; overflow-y: auto; }
+        
+        /* Trial Management Page */
+        .trial-page-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .trial-page-header h1 { font-size: 22px; color: #333; font-weight: 600; }
+        .trial-page-header .upload-btn {
+            height: 40px; padding: 0 24px; border-radius: 8px;
+            background: linear-gradient(135deg, #4B7BF5, #5B8AF7);
+            color: #fff; font-size: 14px; display: flex; align-items: center; gap: 8px;
+            transition: all 0.3s; box-shadow: 0 2px 8px rgba(75,123,245,0.25);
+        }
+        .trial-page-header .upload-btn:hover { box-shadow: 0 4px 12px rgba(75,123,245,0.35); }
+        
+        /* Tabs */
+        .content-tabs { display: flex; gap: 0; margin-bottom: 20px; background: #fff; border-radius: 10px 10px 0 0; border-bottom: 1px solid #eee; }
+        .content-tab {
+            padding: 14px 28px; font-size: 15px; color: #888; cursor: pointer;
+            border-bottom: 2px solid transparent; transition: all 0.3s; font-weight: 500;
+        }
+        .content-tab.active { color: #4B7BF5; border-bottom-color: #4B7BF5; font-weight: 600; }
+        .content-tab:hover { color: #4B7BF5; }
+        
+        /* Recording Table */
+        .content-card { background: #fff; border-radius: 0 0 10px 10px; padding: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .table-toolbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px; border-bottom: 1px solid #f0f0f0;
+        }
+        .table-toolbar .search-box {
+            display: flex; align-items: center; gap: 8px;
+            background: #f5f7fb; border-radius: 8px; padding: 0 12px; height: 36px;
+        }
+        .table-toolbar .search-box input {
+            border: none; background: none; font-size: 13px; width: 200px; color: #333;
+        }
+        .table-toolbar .search-box .search-icon { color: #bbb; font-size: 14px; }
+        .table-toolbar .toolbar-actions { display: flex; gap: 8px; }
+        .btn-sm {
+            height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px;
+            display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+        }
+        .btn-sm-primary { background: #f0f5ff; color: #4B7BF5; border: 1px solid #e0e7ff; }
+        .btn-sm-primary:hover { background: #e0e7ff; }
+        .btn-sm-danger { background: #fff1f2; color: #ef4444; border: 1px solid #fecaca; }
+        .btn-sm-danger:hover { background: #fecaca; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            padding: 12px 16px; font-size: 13px; color: #999; font-weight: 500;
+            text-align: left; background: #fafbfc; border-bottom: 1px solid #f0f0f0;
+        }
+        tbody td {
+            padding: 14px 16px; font-size: 14px; color: #333; border-bottom: 1px solid #f5f5f5;
+        }
+        tbody tr:hover { background: #fafbff; }
+        .status-tag {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 500;
+        }
+        .status-tag.processing { background: #eff6ff; color: #3b82f6; }
+        .status-tag.completed { background: #f0fdf4; color: #16a34a; }
+        .status-tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+        .status-tag.processing .dot { background: #3b82f6; animation: pulse 1.5s infinite; }
+        .status-tag.completed .dot { background: #16a34a; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+        
+        .action-btn {
+            padding: 4px 10px; border-radius: 4px; font-size: 12px; color: #4B7BF5;
+            background: none; transition: all 0.2s; margin-right: 4px;
+        }
+        .action-btn:hover { background: #f0f5ff; }
+        .action-btn.danger { color: #ef4444; }
+        .action-btn.danger:hover { background: #fff1f2; }
+        
+        /* Transcription Modal */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: #fff; border-radius: 16px; width: 640px; max-height: 80vh;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15); overflow: hidden;
+        }
+        .modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 24px; border-bottom: 1px solid #f0f0f0;
+        }
+        .modal-header h3 { font-size: 17px; color: #333; }
+        .modal-close {
+            width: 32px; height: 32px; border-radius: 6px; background: none;
+            font-size: 20px; color: #999; display: flex; align-items: center; justify-content: center;
+        }
+        .modal-close:hover { background: #f5f5f5; color: #333; }
+        .modal-body { padding: 24px; overflow-y: auto; max-height: 60vh; }
+        .transcript-content {
+            font-size: 14px; color: #444; line-height: 2;
+            background: #f9fafb; border-radius: 8px; padding: 20px;
+        }
+        .transcript-content .speaker { font-weight: 600; color: #4B7BF5; }
+        .transcript-content .speaker.b { color: #7C3AED; }
+        .transcript-content .timestamp { font-size: 11px; color: #bbb; margin-left: 8px; }
+        
+        /* Report View */
+        .report-section { padding: 30px 20px; }
+        .report-generating {
+            text-align: center; padding: 60px 20px;
+        }
+        .report-generating .rg-icon {
+            width: 120px; height: 120px; margin: 0 auto 24px;
+            background: linear-gradient(135deg, #f0f5ff, #ede7f6);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 48px; animation: breathe 3s ease-in-out infinite;
+        }
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); }
+        }
+        .report-generating h3 { font-size: 18px; color: #333; margin-bottom: 8px; }
+        .report-generating p { font-size: 14px; color: #888; margin-bottom: 6px; line-height: 1.8; }
+        .report-generating .progress-info {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;
+            padding: 10px 20px; margin-top: 16px; font-size: 13px; color: #92400e;
+        }
+        
+        .report-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .report-card {
+            background: #fff; border: 1px solid #eee; border-radius: 12px;
+            padding: 24px; transition: all 0.3s; cursor: pointer;
+        }
+        .report-card:hover { border-color: #c7d2fe; box-shadow: 0 4px 12px rgba(75,123,245,0.1); }
+        .report-card .rc-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .report-card .rc-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 20px;
+        }
+        .report-card .rc-title { font-size: 15px; color: #333; font-weight: 600; }
+        .report-card .rc-desc { font-size: 13px; color: #888; line-height: 1.6; }
+        .report-card .rc-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+        .report-card .rc-time { font-size: 12px; color: #bbb; }
+        .report-card .rc-btn { font-size: 13px; color: #4B7BF5; font-weight: 500; }
+        
+        /* Loading animation for page transitions */
+        .page-transition {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; z-index: 9999; display: none;
+            justify-content: center; align-items: center;
+        }
+        .page-transition.show { display: flex; }
+        .loader {
+            width: 40px; height: 40px; border: 3px solid #e0e7ff;
+            border-top-color: #4B7BF5; border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Success animation */
+        .success-checkmark {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: #f0fdf4; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px; font-size: 36px;
+            animation: scaleIn 0.5s ease;
+        }
+        @keyframes scaleIn { from { transform: scale(0); } to { transform: scale(1); } }
+        
+        /* Pagination */
+        .table-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 20px; border-top: 1px solid #f0f0f0; font-size: 13px; color: #999;
+        }
+
+        /* Tooltip for demo */
+        .demo-tooltip {
+            position: fixed; bottom: 20px; right: 20px;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: #fff; padding: 14px 20px; border-radius: 10px;
+            font-size: 13px; z-index: 9999; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            display: flex; align-items: center; gap: 10px; max-width: 360px;
+        }
+        .demo-tooltip .tip-badge {
+            background: #4B7BF5; color: #fff; padding: 2px 8px; border-radius: 4px;
+            font-size: 11px; font-weight: 600; white-space: nowrap;
+        }
+        
+        /* Edit modal */
+        .edit-form .form-group label {
+            display: block; font-size: 13px; color: #666; margin-bottom: 6px;
+        }
+        .edit-form .form-group input,
+        .edit-form .form-group textarea {
+            width: 100%; border: 1px solid #e0e0e0; border-radius: 8px;
+            padding: 10px 14px; font-size: 14px; color: #333;
+        }
+        .edit-form .form-group textarea { height: 80px; resize: vertical; }
+        .modal-footer {
+            display: flex; justify-content: flex-end; gap: 10px;
+            padding: 16px 24px; border-top: 1px solid #f0f0f0;
+        }
+
+        /* Confirm dialog */
+        .confirm-dialog {
+            background: #fff; border-radius: 12px; width: 400px; padding: 30px;
+            text-align: center;
+        }
+        .confirm-dialog .icon { font-size: 48px; margin-bottom: 16px; }
+        .confirm-dialog h3 { font-size: 16px; color: #333; margin-bottom: 8px; }
+        .confirm-dialog p { font-size: 14px; color: #888; margin-bottom: 24px; }
+        .confirm-dialog .btns { display: flex; justify-content: center; gap: 12px; }
+    </style>
+</head>
+<body>
+
+<!-- ============ PAGE TRANSITION ============ -->
+<div class="page-transition" id="pageTransition">
+    <div class="loader"></div>
+</div>
+
+<!-- ============ DEMO TOOLTIP ============ -->
+<div class="demo-tooltip" id="demoTip">
+    <span class="tip-badge">演示</span>
+    <span id="demoTipText">点击右侧"免费试用"卡片开始体验流程</span>
+</div>
+
+<!-- ============ PAGE 1: LOGIN ============ -->
+<div class="page active" id="loginPage">
+    <div class="login-left">
+        <h1>销售保AI <span>从录音中发现业绩增长点，突破销售卡点</span></h1>
+        <div class="login-illustration">
+            <div class="illustration-content">
+                <div class="ai-icon">AI</div>
+                <p>录音智能分析 · 增长点挖掘 · 卡点诊断 · 话术优化</p>
+            </div>
+        </div>
+        <div class="login-stats">
+            <div class="stat-item">
+                <div class="label">累计服务</div>
+                <div class="value">50000<span>+ 企业</span></div>
+            </div>
+            <div class="stat-item">
+                <div class="label">覆盖</div>
+                <div class="value">280<span>+ 城市</span></div>
+            </div>
+            <div class="stat-item">
+                <div class="label">业务涉及</div>
+                <div class="value">100<span>+ 行业</span></div>
+            </div>
+            <div class="stat-item">
+                <div class="label">赋能销售</div>
+                <div class="value">120000<span>+ 人</span></div>
+            </div>
+            <div class="stat-item">
+                <div class="label">融资近</div>
+                <div class="value">亿<span>元</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="login-right">
+        <div class="login-logo">
+            <div class="logo-icon">AI</div>
+            <div class="logo-text">
+                <h2>销售保AI</h2>
+                <p>SALESGUARD AI</p>
+            </div>
+        </div>
+        <div class="login-tabs">
+            <div class="login-tab active">密码登录</div>
+            <div class="login-tab">验证码登录</div>
+        </div>
+        <div class="login-form">
+            <div class="form-group">
+                <input type="text" placeholder="请输入手机号码" />
+            </div>
+            <div class="form-group">
+                <input type="password" placeholder="请输入密码" />
+            </div>
+            <div class="form-options">
+                <label><input type="checkbox" /> 记住密码</label>
+                <a href="#">忘记密码？</a>
+            </div>
+            <button class="btn-login" onclick="showTip('这是正常登录入口，请点击下方【免费试用】卡片体验试用流程')">登录</button>
+            <div class="login-links">
+                <a href="#">下载销售保APP</a> ｜ <a href="#">立即注册</a>
+            </div>
+        </div>
+        
+        <!-- ★ 新增：免费试用入口 ★ -->
+        <div class="trial-entry" onclick="goToUpload()">
+            <div class="trial-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            </div>
+            <div class="trial-info">
+                <h3>🎙️ 免费试用 — 上传录音，找到业绩增长点</h3>
+                <p>无需注册，上传录音即可获取AI诊断报告，发现增长机会与销售卡点</p>
+            </div>
+            <div class="trial-arrow">→</div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ PAGE 2: UPLOAD ============ -->
+<div class="page" id="uploadPage">
+    <div class="upload-header">
+        <div class="logo-sm">
+            <div class="icon">AI</div>
+            <span>销售保AI</span>
+        </div>
+        <div class="back-btn" onclick="goToLogin()">← 返回登录</div>
+    </div>
+    <div class="upload-container">
+        <div class="steps">
+            <div class="step active" id="step1">
+                <div class="step-num">1</div>
+                <div class="step-label">上传录音</div>
+            </div>
+            <div class="step-line" id="stepLine1"></div>
+            <div class="step" id="step2">
+                <div class="step-num">2</div>
+                <div class="step-label">注册账号</div>
+            </div>
+            <div class="step-line" id="stepLine2"></div>
+            <div class="step" id="step3">
+                <div class="step-num">3</div>
+                <div class="step-label">查看结果</div>
+            </div>
+        </div>
+        
+        <div class="upload-title"><h2>上传销售录音，AI帮你找到业绩增长点与卡点</h2></div>
+        <div class="upload-subtitle">支持 MP3、WAV、M4A、AMR 等常见音频格式，单文件最大200MB</div>
+        
+        <div class="dropzone" id="dropzone" onclick="simulateUpload()">
+            <div class="dropzone-icon">📁</div>
+            <h3>将录音文件拖拽到此处，或 <span>点击选择文件</span></h3>
+            <p>可一次上传多个文件，不限数量</p>
+        </div>
+        
+        <div class="file-list" id="fileList"></div>
+        
+        <div class="upload-actions">
+            <button class="btn-outline" onclick="simulateUpload()">继续添加文件</button>
+            <button class="btn-primary" id="nextStepBtn" disabled onclick="goToRegister()">上传完成，下一步 →</button>
+        </div>
+
+        <!-- ★ 4大行业报告示例 ★ -->
+        <div style="margin-top: 48px; padding-top: 36px; border-top: 2px solid #eef2ff;">
+            <h3 style="font-size: 18px; color: #333; text-align: center; margin-bottom: 6px;">🏆 看看同行怎么用销售保AI提升业绩</h3>
+            <p style="font-size: 13px; color: #999; text-align: center; margin-bottom: 28px;">已帮助 4 大行业数万企业发现增长机会，以下是真实报告示例</p>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                <!-- 房产行业 -->
+                <div style="background: #fff; border: 1px solid #eee; border-radius: 14px; padding: 22px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#4B7BF5';this.style.boxShadow='0 6px 20px rgba(75,123,245,0.12)'" onmouseout="this.style.borderColor='#eee';this.style.boxShadow='none'">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                        <div style="width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #fef3c7, #fde68a); display: flex; align-items: center; justify-content: center; font-size: 22px;">🏠</div>
+                        <div>
+                            <div style="font-size: 15px; font-weight: 600; color: #333;">房产行业报告示例</div>
+                            <div style="font-size: 11px; color: #999; margin-top: 2px;">某TOP10房企 · 152通录音分析</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 13px; color: #555; line-height: 1.8; margin-bottom: 14px;">
+                        <div style="margin-bottom: 6px;">📌 <strong>发现增长点：</strong>带看后48小时内跟进成交率提升<span style="color:#16a34a;font-weight:700;">37%</span></div>
+                        <div>🚧 <strong>诊断卡点：</strong>68%销售未做价格异议预处理，导致客户流失</div>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 11px; color: #bbb;">示例报告 · 脱敏数据</span>
+                        <span style="font-size: 12px; color: #4B7BF5; font-weight: 500;">查看示例 →</span>
+                    </div>
+                </div>
+                <!-- 教育培训行业 -->
+                <div style="background: #fff; border: 1px solid #eee; border-radius: 14px; padding: 22px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#4B7BF5';this.style.boxShadow='0 6px 20px rgba(75,123,245,0.12)'" onmouseout="this.style.borderColor='#eee';this.style.boxShadow='none'">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                        <div style="width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #dbeafe, #bfdbfe); display: flex; align-items: center; justify-content: center; font-size: 22px;">📚</div>
+                        <div>
+                            <div style="font-size: 15px; font-weight: 600; color: #333;">教育培训行业报告示例</div>
+                            <div style="font-size: 11px; color: #999; margin-top: 2px;">某K12头部机构 · 230通录音分析</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 13px; color: #555; line-height: 1.8; margin-bottom: 14px;">
+                        <div style="margin-bottom: 6px;">📌 <strong>发现增长点：</strong>试听课后24h回访转化率高达<span style="color:#16a34a;font-weight:700;">52%</span>，远超平均</div>
+                        <div>🚧 <strong>诊断卡点：</strong>45%课程顾问未挖掘家长核心焦虑，仅做功能介绍</div>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 11px; color: #bbb;">示例报告 · 脱敏数据</span>
+                        <span style="font-size: 12px; color: #4B7BF5; font-weight: 500;">查看示例 →</span>
+                    </div>
+                </div>
+                <!-- 金融保险行业 -->
+                <div style="background: #fff; border: 1px solid #eee; border-radius: 14px; padding: 22px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#4B7BF5';this.style.boxShadow='0 6px 20px rgba(75,123,245,0.12)'" onmouseout="this.style.borderColor='#eee';this.style.boxShadow='none'">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                        <div style="width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #dcfce7, #bbf7d0); display: flex; align-items: center; justify-content: center; font-size: 22px;">💰</div>
+                        <div>
+                            <div style="font-size: 15px; font-weight: 600; color: #333;">金融保险行业报告示例</div>
+                            <div style="font-size: 11px; color: #999; margin-top: 2px;">某保险集团分公司 · 318通录音分析</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 13px; color: #555; line-height: 1.8; margin-bottom: 14px;">
+                        <div style="margin-bottom: 6px;">📌 <strong>发现增长点：</strong>场景化需求引导使加保率提升<span style="color:#16a34a;font-weight:700;">28%</span></div>
+                        <div>🚧 <strong>诊断卡点：</strong>73%代理人缺乏风险场景举例，客户感知价值不足</div>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 11px; color: #bbb;">示例报告 · 脱敏数据</span>
+                        <span style="font-size: 12px; color: #4B7BF5; font-weight: 500;">查看示例 →</span>
+                    </div>
+                </div>
+                <!-- 汽车销售行业 -->
+                <div style="background: #fff; border: 1px solid #eee; border-radius: 14px; padding: 22px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#4B7BF5';this.style.boxShadow='0 6px 20px rgba(75,123,245,0.12)'" onmouseout="this.style.borderColor='#eee';this.style.boxShadow='none'">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                        <div style="width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #ede9fe, #ddd6fe); display: flex; align-items: center; justify-content: center; font-size: 22px;">🚗</div>
+                        <div>
+                            <div style="font-size: 15px; font-weight: 600; color: #333;">汽车销售行业报告示例</div>
+                            <div style="font-size: 11px; color: #999; margin-top: 2px;">某合资品牌4S店 · 196通录音分析</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 13px; color: #555; line-height: 1.8; margin-bottom: 14px;">
+                        <div style="margin-bottom: 6px;">📌 <strong>发现增长点：</strong>试驾后主动对比竞品话术使订单率提升<span style="color:#16a34a;font-weight:700;">41%</span></div>
+                        <div>🚧 <strong>诊断卡点：</strong>56%销售顾问未在首次接待中建立信任关系</div>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 11px; color: #bbb;">示例报告 · 脱敏数据</span>
+                        <span style="font-size: 12px; color: #4B7BF5; font-weight: 500;">查看示例 →</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ PAGE 3: REGISTER ============ -->
+<div class="page" id="registerPage">
+    <div class="upload-header">
+        <div class="logo-sm">
+            <div class="icon">AI</div>
+            <span>销售保AI</span>
+        </div>
+        <div class="back-btn" onclick="goToUploadFromReg()">← 返回上一步</div>
+    </div>
+    <div class="register-container">
+        <div class="steps" style="margin-bottom: 40px;">
+            <div class="step done" id="rstep1">
+                <div class="step-num">✓</div>
+                <div class="step-label">上传录音</div>
+            </div>
+            <div class="step-line done" id="rstepLine1"></div>
+            <div class="step active" id="rstep2">
+                <div class="step-num">2</div>
+                <div class="step-label">注册账号</div>
+            </div>
+            <div class="step-line" id="rstepLine2"></div>
+            <div class="step" id="rstep3">
+                <div class="step-num">3</div>
+                <div class="step-label">查看结果</div>
+            </div>
+        </div>
+        
+        <div class="register-card">
+            <h2>完成注册，查看分析结果</h2>
+            
+            <div class="upload-summary">
+                <h4>已上传录音</h4>
+                <div class="file-count" id="regFileCount">5 <span>个文件</span></div>
+            </div>
+            
+            <div class="register-tip">
+                <div class="tip-icon">💡</div>
+                <p>输入手机号后，我们将为您<strong>生成专属业绩诊断报告</strong>，精准定位销售增长点与卡点。报告预计 <strong>2个工作日内</strong>生成，届时通过短信通知您。</p>
+            </div>
+            
+            <div class="form-group">
+                <input type="text" placeholder="请输入手机号" id="regPhone" oninput="checkRegForm()" />
+            </div>
+            <div class="form-group">
+                <div class="sms-group">
+                    <input type="text" placeholder="请输入验证码" id="regCode" oninput="checkRegForm()" />
+                    <button class="btn-sms" id="smsBtn" onclick="sendSms()">获取验证码</button>
+                </div>
+            </div>
+            
+            <div class="agreement">
+                <input type="checkbox" id="agreeCheck" checked onchange="checkRegForm()" />
+                <label for="agreeCheck">我已阅读并同意 <a href="#">《服务协议》</a> 和 <a href="#">《隐私政策》</a></label>
+            </div>
+            
+            <button class="btn-primary" id="regSubmitBtn" onclick="completeRegister()" disabled>完成注册，查看分析结果</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ PAGE 4: DASHBOARD ============ -->
+<div class="page" id="dashboardPage">
+    <div class="dash-topbar">
+        <div class="logo-sm">
+            <div class="icon">AI</div>
+            <div>
+                <span class="text">销售保AI</span>
+                <span class="sub">SALESGUARD AI</span>
+            </div>
+        </div>
+        <span class="org-name">试用企业</span>
+        <div class="topbar-right">
+            <button class="topbar-btn">📞</button>
+            <button class="topbar-btn">🔍</button>
+            <button class="topbar-btn">📋</button>
+            <button class="topbar-btn" style="position: relative;">🔔<span style="position:absolute;top:4px;right:4px;width:8px;height:8px;background:#ef4444;border-radius:50;border:1.5px solid #fff;"></span></button>
+            <div class="user-avatar">
+                <div class="avatar">试</div>
+                <span class="name">试用用户</span>
+            </div>
+        </div>
+    </div>
+    <div class="dash-body">
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="menu-item active" onclick="switchMenu(this, 'trial')">
+                    <span class="icon">🎙️</span> 试用管理
+                    <span class="tag-trial">试用</span>
+                </div>
+            </div>
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-section">
+                <div class="menu-item" onclick="switchMenu(this, 'dashboard')">
+                    <span class="icon">📊</span> 仪表盘
+                </div>
+                <div class="menu-item" onclick="switchMenu(this, 'other')">
+                    <span class="icon">📈</span> AI线索跟进分析
+                </div>
+                <div class="menu-item" onclick="switchMenu(this, 'other')">
+                    <span class="icon">📥</span> 导入线索
+                </div>
+                <div class="menu-item" onclick="switchMenu(this, 'other')">
+                    <span class="icon">🔍</span> AI线索质量分析
+                </div>
+                <div class="menu-item" onclick="switchMenu(this, 'other')">
+                    <span class="icon">📋</span> 线索管理
+                </div>
+                <div class="menu-item" onclick="switchMenu(this, 'other')">
+                    <span class="icon">🌊</span> 公海线索
+                </div>
+                <div class="menu-item" onclick="switchMenu(this, 'other')">
+                    <span class="icon">📞</span> 外呼任务
+                </div>
+                <div class="menu-item" onclick="switchMenu(this, 'other')">
+                    <span class="icon">👤</span> 客户管理
+                </div>
+                <div class="menu-item" onclick="switchMenu(this, 'other')">
+                    <span class="icon">📝</span> 订单管理
+                </div>
+                <div class="menu-item" onclick="switchMenu(this, 'other')">
+                    <span class="icon">🤖</span> AI谈单助手
+                    <span class="tag-new">NEW</span>
+                </div>
+                <div class="menu-item" onclick="switchMenu(this, 'other')">
+                    <span class="icon">🧲</span> AI获客助手
+                </div>
+                <div class="menu-item" onclick="switchMenu(this, 'other')">
+                    <span class="icon">📚</span> 企业知识库
+                </div>
+                <div class="menu-item" onclick="switchMenu(this, 'other')">
+                    <span class="icon">🎯</span> AI陪练助手
+                    <span class="tag-new">NEW</span>
+                </div>
+                <div class="menu-item" onclick="switchMenu(this, 'other')">
+                    <span class="icon">💬</span> AI建站助手
+                </div>
+                <div class="menu-item" onclick="switchMenu(this, 'other')">
+                    <span class="icon">✨</span> AI营销助手
+                </div>
+                <div class="menu-item" onclick="switchMenu(this, 'other')">
+                    <span class="icon">👔</span> AI老板助手
+                </div>
+                <div class="menu-item" onclick="switchMenu(this, 'other')">
+                    <span class="icon">🎯</span> AI实时指导
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content" id="mainContent">
+            <!-- Trial Management Content -->
+            <div id="trialContent">
+                <div class="trial-page-header">
+                    <h1>试用管理</h1>
+                    <button class="upload-btn" onclick="showUploadModal()">
+                        <span>+</span> 上传录音
+                    </button>
+                </div>
+                
+                <div class="content-tabs">
+                    <div class="content-tab active" onclick="switchTab(this, 'recordings')">录音管理</div>
+                    <div class="content-tab" onclick="switchTab(this, 'reports')">分析报告</div>
+                </div>
+                
+                <!-- Recordings Tab -->
+                <div class="content-card" id="recordingsTab">
+                    <div class="table-toolbar">
+                        <div class="search-box">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" placeholder="搜索文件名..." />
+                        </div>
+                        <div class="toolbar-actions">
+                            <button class="btn-sm btn-sm-primary" onclick="simulateDashUpload()">+ 上传录音</button>
+                            <button class="btn-sm btn-sm-danger">🗑️ 批量删除</button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" /></th>
+                                <th>序号</th>
+                                <th>文件名</th>
+                                <th>时长</th>
+                                <th>上传时间</th>
+                                <th>转写状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recordingsBody">
+                            <tr>
+                                <td><input type="checkbox" /></td>
+                                <td>1</td>
+                                <td>客户沟通_张总_20250312.mp3</td>
+                                <td>15:32</td>
+                                <td>2025-03-12 14:30</td>
+                                <td><span class="status-tag completed"><span class="dot"></span>已完成</span></td>
+                                <td>
+                                    <button class="action-btn" onclick="showTranscript(0)">查看转文字</button>
+                                    <button class="action-btn" onclick="showEditModal(0)">编辑</button>
+                                    <button class="action-btn danger" onclick="showDeleteConfirm(0)">删除</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" /></td>
+                                <td>2</td>
+                                <td>产品演示_李经理_20250312.wav</td>
+                                <td>23:15</td>
+                                <td>2025-03-12 14:30</td>
+                                <td><span class="status-tag completed"><span class="dot"></span>已完成</span></td>
+                                <td>
+                                    <button class="action-btn" onclick="showTranscript(1)">查看转文字</button>
+                                    <button class="action-btn" onclick="showEditModal(1)">编辑</button>
+                                    <button class="action-btn danger" onclick="showDeleteConfirm(1)">删除</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" /></td>
+                                <td>3</td>
+                                <td>报价跟进_王总监_20250312.mp3</td>
+                                <td>08:45</td>
+                                <td>2025-03-12 14:31</td>
+                                <td><span class="status-tag completed"><span class="dot"></span>已完成</span></td>
+                                <td>
+                                    <button class="action-btn" onclick="showTranscript(2)">查看转文字</button>
+                                    <button class="action-btn" onclick="showEditModal(2)">编辑</button>
+                                    <button class="action-btn danger" onclick="showDeleteConfirm(2)">删除</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" /></td>
+                                <td>4</td>
+                                <td>需求沟通_赵总_20250312.m4a</td>
+                                <td>31:20</td>
+                                <td>2025-03-12 14:31</td>
+                                <td><span class="status-tag processing"><span class="dot"></span>转写中</span></td>
+                                <td>
+                                    <button class="action-btn" style="color:#ccc;cursor:not-allowed;">查看转文字</button>
+                                    <button class="action-btn" onclick="showEditModal(3)">编辑</button>
+                                    <button class="action-btn danger" onclick="showDeleteConfirm(3)">删除</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" /></td>
+                                <td>5</td>
+                                <td>合同确认_刘总_20250312.mp3</td>
+                                <td>12:08</td>
+                                <td>2025-03-12 14:32</td>
+                                <td><span class="status-tag processing"><span class="dot"></span>转写中</span></td>
+                                <td>
+                                    <button class="action-btn" style="color:#ccc;cursor:not-allowed;">查看转文字</button>
+                                    <button class="action-btn" onclick="showEditModal(4)">编辑</button>
+                                    <button class="action-btn danger" onclick="showDeleteConfirm(4)">删除</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="table-footer">
+                        <span>共 5 条记录</span>
+                        <span>第 1/1 页</span>
+                    </div>
+                </div>
+                
+                <!-- Reports Tab (hidden by default) -->
+                <div class="content-card" id="reportsTab" style="display: none;">
+                    <div class="report-section">
+                        <div class="report-generating">
+                            <div class="rg-icon">📊</div>
+                            <h3>业绩诊断报告正在生成中...</h3>
+                            <p>AI正在深度分析您上传的 <strong>5个</strong> 录音文件，挖掘<strong>业绩增长点</strong>与<strong>销售卡点</strong></p>
+                            <p>报告预计在 <strong>2025年3月14日</strong> 前生成完毕</p>
+                            <div class="progress-info">
+                                ⏳ 预计剩余时间：约1天18小时 | 报告生成后将通过短信通知您
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 40px; border-top: 1px solid #f0f0f0; padding-top: 30px;">
+                            <h3 style="font-size: 16px; color: #333; margin-bottom: 16px;">📋 报告生成后，您将获得以下洞察</h3>
+                            <div class="report-cards">
+                                <div class="report-card" style="opacity: 0.6;">
+                                    <div class="rc-header">
+                                        <div class="rc-icon" style="background: #f0fdf4;">🚀</div>
+                                        <div class="rc-title">业绩增长点分析报告</div>
+                                    </div>
+                                    <div class="rc-desc">AI从录音中识别高成交话术模式、最佳跟进时机与高转化沟通策略，找到可复制的增长方法</div>
+                                    <div class="rc-footer">
+                                        <span class="rc-time">预计生成中...</span>
+                                        <span class="rc-btn" style="color: #ccc;">待生成</span>
+                                    </div>
+                                </div>
+                                <div class="report-card" style="opacity: 0.6;">
+                                    <div class="rc-header">
+                                        <div class="rc-icon" style="background: #fff1f2;">🚧</div>
+                                        <div class="rc-title">销售卡点诊断报告</div>
+                                    </div>
+                                    <div class="rc-desc">精准定位客户流失环节、异议处理薄弱点与成交障碍，针对性解决影响业绩的关键卡点</div>
+                                    <div class="rc-footer">
+                                        <span class="rc-time">预计生成中...</span>
+                                        <span class="rc-btn" style="color: #ccc;">待生成</span>
+                                    </div>
+                                </div>
+                                <div class="report-card" style="opacity: 0.6;">
+                                    <div class="rc-header">
+                                        <div class="rc-icon" style="background: #eff6ff;">💬</div>
+                                        <div class="rc-title">话术优化建议报告</div>
+                                    </div>
+                                    <div class="rc-desc">基于行业最佳实践，为每通录音生成个性化话术优化方案，提供可直接使用的优秀话术模板</div>
+                                    <div class="rc-footer">
+                                        <span class="rc-time">预计生成中...</span>
+                                        <span class="rc-btn" style="color: #ccc;">待生成</span>
+                                    </div>
+                                </div>
+                                <div class="report-card" style="opacity: 0.6;">
+                                    <div class="rc-header">
+                                        <div class="rc-icon" style="background: #fffbeb;">📊</div>
+                                        <div class="rc-title">团队能力差距报告</div>
+                                    </div>
+                                    <div class="rc-desc">对比团队成员的沟通能力差异，发现Top销售的成功秘诀，制定针对性培训提升计划</div>
+                                    <div class="rc-footer">
+                                        <span class="rc-time">预计生成中...</span>
+                                        <span class="rc-btn" style="color: #ccc;">待生成</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ TRANSCRIPT MODAL ============ -->
+<div class="modal-overlay" id="transcriptModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="transcriptTitle">转文字结果</h3>
+            <button class="modal-close" onclick="closeModal('transcriptModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="transcript-content" id="transcriptBody"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ EDIT MODAL ============ -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal" style="width: 480px;">
+        <div class="modal-header">
+            <h3>编辑录音信息</h3>
+            <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="edit-form">
+                <div class="form-group">
+                    <label>文件名称</label>
+                    <input type="text" id="editFileName" />
+                </div>
+                <div class="form-group">
+                    <label>备注信息</label>
+                    <textarea id="editRemark" placeholder="添加备注..."></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-outline" style="height:40px;padding:0 24px;font-size:14px;" onclick="closeModal('editModal')">取消</button>
+            <button class="btn-primary" style="height:40px;padding:0 24px;font-size:14px;" onclick="saveEdit()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ DELETE CONFIRM MODAL ============ -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="confirm-dialog">
+        <div class="icon">⚠️</div>
+        <h3>确认删除</h3>
+        <p id="deleteFileName">确定要删除这个录音文件吗？删除后将无法恢复。</p>
+        <div class="btns">
+            <button class="btn-outline" style="height:40px;padding:0 24px;font-size:14px;" onclick="closeModal('deleteModal')">取消</button>
+            <button class="btn-primary" style="height:40px;padding:0 24px;font-size:14px;background:linear-gradient(135deg,#ef4444,#f87171);" onclick="confirmDelete()">确认删除</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ JAVASCRIPT ============ -->
+<script>
+    // ====== Data ======
+    const mockFiles = [
+        { name: '客户沟通_张总_20250312.mp3', size: '15.2 MB', duration: '15:32' },
+        { name: '产品演示_李经理_20250312.wav', size: '28.7 MB', duration: '23:15' },
+        { name: '报价跟进_王总监_20250312.mp3', size: '8.3 MB', duration: '08:45' },
+        { name: '需求沟通_赵总_20250312.m4a', size: '22.1 MB', duration: '31:20' },
+        { name: '合同确认_刘总_20250312.mp3', size: '11.5 MB', duration: '12:08' },
+    ];
+
+    const transcripts = [
+        `<span class="speaker">销售小王</span><span class="timestamp">00:00</span><br>
+张总您好，我是销售保的小王，之前跟您沟通过我们的AI质检方案，今天想跟您详细聊一下。<br><br>
+<span class="speaker b">张总</span><span class="timestamp">00:12</span><br>
+小王你好，我记得。我们确实在考虑引入一套质检系统，现在人工质检效率太低了。<br><br>
+<span class="speaker">销售小王</span><span class="timestamp">00:25</span><br>
+是的张总，很多企业都面临同样的问题。我们的AI质检系统可以做到100%全量质检，而且实时出结果，平均每通录音分析只需要30秒。<br><br>
+<span class="speaker b">张总</span><span class="timestamp">00:45</span><br>
+30秒？这么快？准确率怎么样？<br><br>
+<span class="speaker">销售小王</span><span class="timestamp">00:52</span><br>
+我们的语音转文字准确率达到了97%以上，质检规则匹配准确率在95%以上。而且系统还支持自定义质检规则，可以根据您公司的业务场景灵活配置。`,
+
+        `<span class="speaker">销售小李</span><span class="timestamp">00:00</span><br>
+李经理好，今天给您演示一下我们销售保AI的核心功能模块。<br><br>
+<span class="speaker b">李经理</span><span class="timestamp">00:08</span><br>
+好的，我主要想看看录音分析和报表这块。<br><br>
+<span class="speaker">销售小李</span><span class="timestamp">00:15</span><br>
+没问题。首先是录音质检模块，您看这里，系统会自动对每通录音进行转写和分析...<br><br>
+<span class="speaker b">李经理</span><span class="timestamp">00:30</span><br>
+这个界面看着还挺清晰的，支持批量导入录音吗？<br><br>
+<span class="speaker">销售小李</span><span class="timestamp">00:38</span><br>
+当然支持，您可以批量上传，也可以通过API自动对接您的呼叫中心系统，录音会自动同步过来分析。`,
+
+        `<span class="speaker">销售小张</span><span class="timestamp">00:00</span><br>
+王总监，上次我发给您的报价方案您看了吗？<br><br>
+<span class="speaker b">王总监</span><span class="timestamp">00:06</span><br>
+看了，整体功能还可以，但价格比我们预算高了一些。<br><br>
+<span class="speaker">销售小张</span><span class="timestamp">00:14</span><br>
+理解您的顾虑。其实如果您选择年付方案，我们可以给到8折优惠，而且还赠送3个月的使用时长。<br><br>
+<span class="speaker b">王总监</span><span class="timestamp">00:28</span><br>
+8折的话...我需要再核算一下。你们支持按坐席数收费吗？<br><br>
+<span class="speaker">销售小张</span><span class="timestamp">00:36</span><br>
+支持的，我们有灵活的计费模式，可以按坐席数、也可以按通话时长来计费，您可以根据团队规模选择最划算的方式。`
+    ];
+
+    let uploadedFiles = [];
+    let currentEditIndex = -1;
+    let currentDeleteIndex = -1;
+
+    // ====== Page Navigation ======
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        const transition = document.getElementById('pageTransition');
+        transition.classList.add('show');
+        setTimeout(() => {
+            document.getElementById(pageId).classList.add('active');
+            transition.classList.remove('show');
+        }, 400);
+    }
+
+    function goToLogin() {
+        showPage('loginPage');
+        showTip('点击右侧"免费试用"卡片开始体验流程');
+    }
+
+    function goToUpload() {
+        showPage('uploadPage');
+        showTip('点击上传区域模拟上传录音文件');
+    }
+
+    function goToRegister() {
+        if (uploadedFiles.length === 0) {
+            showTip('请先上传至少一个录音文件');
+            return;
+        }
+        showPage('registerPage');
+        document.getElementById('regFileCount').innerHTML = uploadedFiles.length + ' <span>个文件</span>';
+        showTip('输入任意手机号和验证码，勾选协议后完成注册');
+    }
+
+    function goToUploadFromReg() {
+        showPage('uploadPage');
+        showTip('您可以继续添加或管理上传的文件');
+    }
+
+    function goToDashboard() {
+        showPage('dashboardPage');
+        showTip('这是试用管理后台，可以查看录音列表、转文字结果，切换到"分析报告"Tab查看报告状态');
+    }
+
+    // ====== Upload Simulation ======
+    let uploadCount = 0;
+
+    function simulateUpload() {
+        if (uploadCount >= mockFiles.length) {
+            showTip('演示文件已全部上传完成，请点击"上传完成，下一步"');
+            return;
+        }
+        
+        const file = mockFiles[uploadCount];
+        uploadCount++;
+        uploadedFiles.push(file);
+
+        const fileList = document.getElementById('fileList');
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.id = 'fileItem' + (uploadCount - 1);
+        fileItem.innerHTML = `
+            <div class="file-icon">
+                <svg viewBox="0 0 24 24"><path fill="#4B7BF5" d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M14,18V16H10V18H14M14,14V12H10V14H14M13,9V3.5L18.5,9H13Z"/></svg>
+            </div>
+            <div class="file-info">
+                <div class="name">${file.name}</div>
+                <div class="size">${file.size}</div>
+            </div>
+            <div class="file-progress">
+                <div class="progress-bar"><div class="fill" id="fill${uploadCount - 1}" style="width: 0%"></div></div>
+                <div class="file-status uploading" id="status${uploadCount - 1}">上传中 0%</div>
+            </div>
+            <button class="file-delete" onclick="removeFile(${uploadCount - 1})">✕</button>
+        `;
+        fileList.appendChild(fileItem);
+
+        // Simulate progress
+        let progress = 0;
+        const idx = uploadCount - 1;
+        const interval = setInterval(() => {
+            progress += Math.random() * 25 + 10;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+                document.getElementById('fill' + idx).style.width = '100%';
+                const statusEl = document.getElementById('status' + idx);
+                statusEl.textContent = '上传完成 ✓';
+                statusEl.className = 'file-status done';
+                document.getElementById('nextStepBtn').disabled = false;
+                
+                if (uploadCount < mockFiles.length) {
+                    showTip(`已上传 ${uploadCount} 个文件，点击继续添加或点击"上传完成，下一步"`);
+                } else {
+                    showTip('所有演示文件已上传完成，点击"上传完成，下一步"继续');
+                }
+            } else {
+                document.getElementById('fill' + idx).style.width = progress + '%';
+                document.getElementById('status' + idx).textContent = '上传中 ' + Math.round(progress) + '%';
+            }
+        }, 200);
+    }
+
+    function removeFile(index) {
+        const item = document.getElementById('fileItem' + index);
+        if (item) {
+            item.style.opacity = '0';
+            item.style.transform = 'translateX(20px)';
+            setTimeout(() => item.remove(), 300);
+        }
+    }
+
+    // ====== Register ======
+    function checkRegForm() {
+        const phone = document.getElementById('regPhone').value;
+        const code = document.getElementById('regCode').value;
+        const agree = document.getElementById('agreeCheck').checked;
+        document.getElementById('regSubmitBtn').disabled = !(phone.length >= 11 && code.length >= 4 && agree);
+    }
+
+    function sendSms() {
+        const btn = document.getElementById('smsBtn');
+        btn.disabled = true;
+        let count = 60;
+        btn.textContent = count + 's后重新获取';
+        const timer = setInterval(() => {
+            count--;
+            btn.textContent = count + 's后重新获取';
+            if (count <= 0) {
+                clearInterval(timer);
+                btn.disabled = false;
+                btn.textContent = '获取验证码';
+            }
+        }, 1000);
+        showTip('验证码已发送（演示模式），请输入任意4位数字');
+    }
+
+    function completeRegister() {
+        const transition = document.getElementById('pageTransition');
+        transition.classList.add('show');
+        
+        setTimeout(() => {
+            transition.classList.remove('show');
+            // Show success message briefly
+            const successDiv = document.createElement('div');
+            successDiv.className = 'page-transition show';
+            successDiv.innerHTML = `
+                <div style="text-align: center;">
+                    <div class="success-checkmark">✅</div>
+                    <h2 style="font-size: 22px; color: #333; margin-bottom: 8px;">注册成功！</h2>
+                    <p style="color: #888; font-size: 14px;">正在为您跳转到管理后台...</p>
+                </div>
+            `;
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                successDiv.remove();
+                goToDashboard();
+            }, 1500);
+        }, 500);
+    }
+
+    // ====== Dashboard ======
+    function switchMenu(el, type) {
+        document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+        el.classList.add('active');
+        
+        if (type === 'trial') {
+            document.getElementById('trialContent').style.display = 'block';
+            showTip('试用管理页面 - 可查看录音列表和分析报告');
+        } else {
+            document.getElementById('trialContent').style.display = 'block';
+            showTip('演示模式：其他菜单暂不可用，请查看"试用管理"');
+        }
+    }
+
+    function switchTab(el, tab) {
+        document.querySelectorAll('.content-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        
+        if (tab === 'recordings') {
+            document.getElementById('recordingsTab').style.display = 'block';
+            document.getElementById('reportsTab').style.display = 'none';
+            showTip('录音管理 - 点击"查看转文字"可查看转写结果');
+        } else {
+            document.getElementById('recordingsTab').style.display = 'none';
+            document.getElementById('reportsTab').style.display = 'block';
+            showTip('分析报告 - 报告正在生成中，预计2个工作日完成');
+        }
+    }
+
+    function showTranscript(index) {
+        const titles = [
+            '客户沟通_张总_20250312.mp3',
+            '产品演示_李经理_20250312.wav',
+            '报价跟进_王总监_20250312.mp3'
+        ];
+        document.getElementById('transcriptTitle').textContent = '转文字 - ' + (titles[index] || titles[0]);
+        document.getElementById('transcriptBody').innerHTML = transcripts[index] || transcripts[0];
+        document.getElementById('transcriptModal').classList.add('show');
+    }
+
+    function showEditModal(index) {
+        currentEditIndex = index;
+        const names = [
+            '客户沟通_张总_20250312.mp3',
+            '产品演示_李经理_20250312.wav',
+            '报价跟进_王总监_20250312.mp3',
+            '需求沟通_赵总_20250312.m4a',
+            '合同确认_刘总_20250312.mp3'
+        ];
+        document.getElementById('editFileName').value = names[index] || '';
+        document.getElementById('editRemark').value = '';
+        document.getElementById('editModal').classList.add('show');
+    }
+
+    function saveEdit() {
+        closeModal('editModal');
+        showTip('保存成功（演示模式）');
+    }
+
+    function showDeleteConfirm(index) {
+        currentDeleteIndex = index;
+        const names = [
+            '客户沟通_张总_20250312.mp3',
+            '产品演示_李经理_20250312.wav',
+            '报价跟进_王总监_20250312.mp3',
+            '需求沟通_赵总_20250312.m4a',
+            '合同确认_刘总_20250312.mp3'
+        ];
+        document.getElementById('deleteFileName').textContent =
+            '确定要删除"' + (names[index] || '') + '"吗？删除后将无法恢复。';
+        document.getElementById('deleteModal').classList.add('show');
+    }
+
+    function confirmDelete() {
+        closeModal('deleteModal');
+        showTip('删除成功（演示模式）');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('show');
+    }
+
+    function showUploadModal() {
+        showTip('上传录音功能（演示模式）- 在实际产品中将打开文件选择对话框');
+    }
+
+    function simulateDashUpload() {
+        showTip('上传录音功能（演示模式）- 在实际产品中将打开文件选择对话框');
+    }
+
+    // ====== Demo Tip ======
+    function showTip(text) {
+        document.getElementById('demoTipText').textContent = text;
+        const tip = document.getElementById('demoTip');
+        tip.style.animation = 'none';
+        tip.offsetHeight; // trigger reflow
+        tip.style.animation = 'tipPulse 0.3s ease';
+    }
+
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+            }
+        });
+    });
+
+    // Add tip pulse animation
+    const style = document.createElement('style');
+    style.textContent = `@keyframes tipPulse { 0% { transform: scale(0.95); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }`;
+    document.head.appendChild(style);
+</script>
+
+</body>
+</html>
